@@ -2,3 +2,4 @@ scripts/
 test/
 .github/workflows/
 .npmignore
+idea/
