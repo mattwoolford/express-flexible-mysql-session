@@ -164,4 +164,29 @@ describe('createDatabaseTable()', function() {
 			});
 		});
 	});
+
+	describe('when \'options.createDatabaseTable\' is set to TRUE and \'options.extractDataValuesIntoCustomColumns\' is set to TRUE', function() {
+
+		let sessionStore;
+		beforeEach(manager.setUp);
+
+		it('should not be called with conflicting options', function() {
+			MySQLStore.prototype.createDatabaseTable = function() {
+				return Promise.reject(new Error('createDatabaseTable method should not have been called'));
+			};
+			let thrownError;
+			try {
+				sessionStore = manager.createInstance({
+														  createDatabaseTable: true,
+														  extractDataValuesIntoCustomColumns: true,
+													  });
+				return sessionStore.onReady();
+			} catch (error) {
+				thrownError = error;
+			}
+			assert.notStrictEqual(typeof thrownError, 'undefined');
+			assert.strictEqual(thrownError.message, 'Cannot create database table when extractDataValuesIntoCustomColumns is set to `true`.');
+		});
+	});
+
 });

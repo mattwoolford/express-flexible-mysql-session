@@ -82,23 +82,63 @@ describe('constructor', function() {
 			});
 		});
 
-		describe('schema', function() {
+		describe('extractDataValuesIntoCustomColumns', function() {
 
-			it('should throw an error when defining unknown column(s)', function() {
-				const options = {
-					schema: {
-						columnNames: {
-							unknownColumn: 'custom_column_name',
-						},
-					},
-				};
-				let thrownError;
-				try { manager.createInstance(options); } catch (error) {
-					thrownError = error;
-				}
-				assert.notStrictEqual(typeof thrownError, 'undefined');
-				assert.strictEqual(thrownError.message, 'Unknown column specified ("unknownColumn"). Only the following columns are configurable: "session_id", "expires", "data". Please review the documentation to understand how to correctly use this option.');
+			describe('FALSE', function() {
+
+				it('should throw an error when defining extra / unknown columns', function() {
+					let thrownError;
+					try {
+						sessionStore = manager.createInstance({
+																  extractDataValuesIntoCustomColumns: false,
+																  schema: {
+																	  columnNames: {
+																		  some: "column"
+																	  }
+																  }
+															  });
+					}
+					catch(error){
+						thrownError = error;
+					}
+					assert.notStrictEqual(typeof thrownError, 'undefined');
+					assert.strictEqual(thrownError.message, 'Unknown column specified ("some"). Only the following columns are configurable when the `extractDataValuesIntoCustomColumns` options is set to `false`: "session_id", "expires", "data". Please review the documentation to understand how to correctly use this option.');
+				});
+
 			});
-		});
+
+			describe('TRUE', function() {
+
+				it('should create extra columns', function() {
+					sessionStore = manager.createInstance({
+															  			extractDataValuesIntoCustomColumns: true,
+																		schema: {
+																  			columnNames: {
+																				some: "column"
+																			}
+																		}
+														  });
+					assert.deepStrictEqual(Object.keys(sessionStore.options.schema.columnNames), ["session_id", "expires", "some"]);
+				});
+
+				it('should create extra columns, even if default columns are specified', function() {
+					sessionStore = manager.createInstance({
+															  extractDataValuesIntoCustomColumns: true,
+															  schema: {
+																  columnNames: {
+																	  some: "column",
+																	  data: "exists",
+																	  session_id: "some_name",
+																	  expires: "expires"
+																  }
+															  }
+														  });
+					assert.deepStrictEqual(Object.keys(sessionStore.options.schema.columnNames), ["session_id", "expires", "data", "some"]);
+				});
+
+			});
+
+		})
+
 	});
 });
