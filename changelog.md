@@ -1,5 +1,11 @@
 # Changelog
 
+* v1.0.0
+  * Added ability to specify custom columns for session data to be stored in MySQL.
+
+---
+
+### From [express-mysql-session](https://github.com/chill117/express-mysql-session):
 * v3.0.3:
   * Updated dependencies
 * v3.0.2:

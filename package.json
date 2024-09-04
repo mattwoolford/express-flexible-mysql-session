@@ -1,7 +1,7 @@
 {
-  "name": "express-mysql-session",
-  "description": "A MySQL session store for express.js",
-  "version": "3.0.3",
+  "name": "express-flexible-mysql-session",
+  "description": "A MySQL session store for express.js, forked from express-mysql-session by Charles Hill",
+  "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "npm run test:unit && npm run test:integration",
@@ -10,15 +10,27 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/chill117/express-mysql-session"
+    "url": "git://github.com/mattwoolford/express-flexible-mysql-session"
   },
   "author": {
-    "name": "Charles Hill",
-    "email": "chill@degreesofzero.com"
+    "name": "Matt Woolford",
+    "email": "ethos-beat-0m@icloud.com"
   },
+  "contributors": [
+    {
+      "name" : "Charles Hill",
+      "email" : "chill@degreesofzero.com",
+      "url" : "https://github.com/chill117/express-mysql-session"
+    },
+    {
+      "name" : "Matt Woolford",
+      "email" : "ethos-beat-0m@icloud.com",
+      "url" : "https://github.com/mattwoolford/express-flexible-mysql-session"
+    }
+  ],
   "license": "MIT",
   "dependencies": {
-    "debug": "4.3.4",
+    "debug":  "4.3.5",
     "mysql2": "3.10.2"
   },
   "devDependencies": {
@@ -28,6 +40,6 @@
   },
   "readmeFilename": "readme.md",
   "bugs": {
-    "url": "https://github.com/chill117/express-mysql-session/issues"
+    "url": "https://github.com/mattwoolford/express-flexible-mysql-session/issues"
   }
 }

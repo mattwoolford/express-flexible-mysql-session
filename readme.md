@@ -1,8 +1,8 @@
-# express-mysql-session
+# express-flexible-mysql-session
 
 A MySQL session store for [express.js](http://expressjs.com/). Compatible with [express-session](https://github.com/expressjs/session).
 
-![Build Status](https://github.com/chill117/express-mysql-session/actions/workflows/tests.yml/badge.svg)
+![Build Status](https://github.com/mattwoolford/express-flexible-mysql-session/actions/workflows/tests.yml/badge.svg)
 
 * [Installation](#installation)
 * [Important Notes](#important-notes)
@@ -25,9 +25,13 @@ A MySQL session store for [express.js](http://expressjs.com/). Compatible with [
 
 Add to your application via `npm`:
 ```bash
-npm install express-mysql-session --save
+npm install express-flexible-mysql-session --save
 ```
-This will install `express-mysql-session` and add it to your application's `package.json` file.
+This will install `express-flexible-mysql-session` and add it to your application's `package.json` file.
+
+> **Note:** This is a fork of [chilli117/express-mysql-session](https://github.com/chilli117/express-mysql-session). The original package only allows `session_id`, `expires` and a `data` column, which means there is no expansibility or flexibility to add custom columns in a schema for a session table.
+> 
+> This fork is for more advanced usage of sessions where data can be extracted into custom-defined columns.
 
 
 ## Important Notes
@@ -51,7 +55,7 @@ Use with your express session middleware, like this:
 const express = require('express');
 const app = module.exports = express();
 const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
+const MySQLStore = require('express-flexible-mysql-session')(session);
 
 const options = {
 	host: 'localhost',
@@ -82,7 +86,7 @@ sessionStore.onReady().then(() => {
 ```
 The session store will internally create a mysql2 [connection pool](https://github.com/sidorares/node-mysql2#using-connection-pools).
 
-The sessions database table should be automatically created, when using default options. If for whatever reason the table is not created, you can find the schema [here](https://github.com/chill117/express-mysql-session/blob/master/schema.sql).
+The sessions database table should be automatically created, when using default options. If for whatever reason the table is not created, you can find the schema [here](https://github.com/mattwoolford/express-flexible-mysql-session/blob/master/schema.sql).
 
 ### Use an existing MySQL connection or pool
 
@@ -90,7 +94,7 @@ To pass in an existing MySQL database connection or pool, you would do something
 ```js
 const mysql = require('mysql2/promise');
 const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
+const MySQLStore = require('express-flexible-mysql-session')(session);
 
 const options = {
     host: 'localhost',
@@ -139,7 +143,9 @@ const options = {
 	checkExpirationInterval: 900000,
 	// The maximum age of a valid session; milliseconds:
 	expiration: 86400000,
-	// Whether or not to create the sessions database table, if one does not already exist:
+	// Whether or not to create the sessions database table, if one does not already exist.
+	// This cannot be `true` if the `extractDataValuesIntoCustomColumns` option is also `true`.
+	// The default value of this option depends on whether or not the `extractDataValuesIntoCustomColumns` option is `true`.
 	createDatabaseTable: true,
 	// Whether or not to end the database connection when the store is closed.
 	// The default value of this option depends on whether or not a connection was passed to the constructor.
@@ -148,6 +154,8 @@ const options = {
 	// Whether or not to disable touch:
 	disableTouch: false,
 	charset: 'utf8mb4_bin',
+	// Whether to extract data into custom columns.
+	extractDataValuesIntoCustomColumns: false,
 	schema: {
 		tableName: 'sessions',
 		columnNames: {
@@ -166,12 +174,12 @@ Additionally, the following options will be passed thru to the [mysql2 module's]
 
 It is possible to use a custom schema for your sessions database table. This can be useful if you want to have extra columns (e.g. "user_id"), indexes, foreign keys, etc. You could also change the type of the "data" column to a smaller or larger text type (e.g. "TINYTEXT", "LONGTEXT", "BLOB") or native "JSON" type.
 
-Set the `createDatabaseTable` option to `FALSE` so that the session store does not automatically create a sessions table.
+Set the `createDatabaseTable` option to `FALSE` so that the session store does not automatically create a sessions table. This option cannot be `true` if the `extractDataValuesIntoCustomColumns` option is also `true`.
 
 Use the `schema` option to provide the custom table and column names to the session store.
 ```js
 const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
+const MySQLStore = require('express-flexible-mysql-session')(session);
 
 const options = {
 	host: 'localhost',
@@ -180,12 +188,16 @@ const options = {
 	password: 'password',
 	database: 'session_test',
 	createDatabaseTable: false,
+	extractDataValuesIntoCustomColumns: true, // This option is required to use extra columns, or `false` if only using standard `session_id`, `expires` and `data` columns
 	schema: {
 		tableName: 'custom_sessions_table_name',
 		columnNames: {
 			session_id: 'custom_session_id_column_name',
 			expires: 'custom_expires_column_name',
-			data: 'custom_data_column_name'
+			// If `extractDataValuesIntoCustomColumns` is `true`, includion of the `data` column is not compulsory
+			data: 'custom_data_column_name',
+			// If `extractDataValuesIntoCustomColumns` is `true`, you can add custom columns here:
+			custom_key_in_data_when_session_is_set: 'any_other_custom_column_name_in_mysql_table'
 		}
 	}
 };
@@ -196,21 +208,25 @@ const sessionStore = new MySQLStore(options);
 
 ### Debugging
 
-`express-mysql-session` uses the [debug module](https://github.com/debug-js/debug) to output debug messages to the console. To output all debug messages, run your node app with the `DEBUG` environment variable:
+`express-flexible-mysql-session` uses the [debug module](https://github.com/debug-js/debug) to output debug messages to the console. To output all debug messages, run your node app with the `DEBUG` environment variable:
 ```
-DEBUG=express-mysql-session* node your-app.js
+DEBUG=express-flexible-mysql-session* node your-app.js
 ```
-This will output log messages as well as error messages from `express-mysql-session`.
+This will output log messages as well as error messages from `express-flexible-mysql-session`.
+
+---
+
+# Further information from the original repository
 
 
 ## Contributing
 
 There are a number of ways you can contribute:
 
-* **Improve or correct the documentation** - All the documentation is in this readme file. If you see a mistake, or think something should be clarified or expanded upon, please [submit a pull request](https://github.com/chill117/express-mysql-session/pulls/new)
-* **Report a bug** - Please review [existing issues](https://github.com/chill117/express-mysql-session/issues) before submitting a new one; to avoid duplicates. If you can't find an issue that relates to the bug you've found, please [create a new one](https://github.com/chill117/express-mysql-session/issues).
-* **Request a feature** - Again, please review the [existing issues](https://github.com/chill117/express-mysql-session/issues) before posting a feature request. If you can't find an existing one that covers your feature idea, please [create a new one](https://github.com/chill117/express-mysql-session/issues).
-* **Fix a bug** - Have a look at the [existing issues](https://github.com/chill117/express-mysql-session/issues) for the project. If there's a bug in there that you'd like to tackle, please feel free to do so. I would ask that when fixing a bug, that you first create a failing test that proves the bug. Then to fix the bug, make the test pass. This should hopefully ensure that the bug never creeps into the project again. After you've done all that, you can [submit a pull request](https://github.com/chill117/express-mysql-session/pulls/new) with your changes.
+* **Improve or correct the documentation** - All the documentation is in this readme file. If you see a mistake, or think something should be clarified or expanded upon, please [submit a pull request](https://github.com/mattwoolford/express-flexible-mysql-session/pulls/new)
+* **Report a bug** - Please review [existing issues](https://github.com/mattwoolford/express-flexible-mysql-session/issues) before submitting a new one; to avoid duplicates. If you can't find an issue that relates to the bug you've found, please [create a new one](https://github.com/mattwoolford/express-flexible-mysql-session/issues).
+* **Request a feature** - Again, please review the [existing issues](https://github.com/mattwoolford/express-flexible-mysql-session/issues) before posting a feature request. If you can't find an existing one that covers your feature idea, please [create a new one](https://github.com/mattwoolford/express-flexible-mysql-session/issues).
+* **Fix a bug** - Have a look at the [existing issues](https://github.com/mattwoolford/express-flexible-mysql-session/issues) for the project. If there's a bug in there that you'd like to tackle, please feel free to do so. I would ask that when fixing a bug, that you first create a failing test that proves the bug. Then to fix the bug, make the test pass. This should hopefully ensure that the bug never creeps into the project again. After you've done all that, you can [submit a pull request](https://github.com/mattwoolford/express-flexible-mysql-session/pulls/new) with your changes.
 
 Before you contribute code, please read through at least some of the source code for the project. I would appreciate it if any pull requests for source code changes follow the coding style of the rest of the project.
 
@@ -223,7 +239,7 @@ Now if you're still interested, you'll need to get your local environment config
 
 First, you'll need to pull down the code from GitHub:
 ```
-git clone https://github.com/chill117/express-mysql-session.git
+git clone https://github.com/mattwoolford/express-flexible-mysql-session.git
 ```
 
 #### Step 2: Install Dependencies
@@ -236,8 +252,10 @@ npm ci
 #### Step 3: Set Up the Test Database
 
 Now, you'll need to set up a local test database:
-```js
-{
+```javascript
+// test/config.js
+
+module.exports = {
 	host: 'localhost',
 	port: 3306,
 	user: 'session_test',
@@ -245,7 +263,7 @@ Now, you'll need to set up a local test database:
 	database: 'session_test'
 };
 ```
-*The test database settings are located in [test/config.js](https://github.com/chill117/express-mysql-session/blob/master/test/config.js)*
+*The test database settings are located in [test/config.js](https://github.com/mattwoolford/express-flexible-mysql-session/blob/master/test/config.js)*
 
 Alternatively, you can provide custom database configurations via environment variables:
 ```
@@ -277,7 +295,7 @@ npm test
 
 ## Changelog
 
-See [changelog.md](https://github.com/chill117/express-mysql-session/blob/master/changelog.md)
+See [changelog.md](https://github.com/mattwoolford/express-flexible-mysql-session/blob/master/changelog.md)
 
 
 ## License
