@@ -154,7 +154,7 @@ const options = {
 	// Whether or not to disable touch:
 	disableTouch: false,
 	charset: 'utf8mb4_bin',
-	// Whether to extract data into custom columns.
+	// Whether to extract data into custom columns:
 	extractDataValuesIntoCustomColumns: false,
 	schema: {
 		tableName: 'sessions',
@@ -194,7 +194,7 @@ const options = {
 		columnNames: {
 			session_id: 'custom_session_id_column_name',
 			expires: 'custom_expires_column_name',
-			// If `extractDataValuesIntoCustomColumns` is `true`, includion of the `data` column is not compulsory
+			// If `extractDataValuesIntoCustomColumns` is `true`, inclusion of the `data` column is not compulsory:
 			data: 'custom_data_column_name',
 			// If `extractDataValuesIntoCustomColumns` is `true`, you can add custom columns here:
 			custom_key_in_data_when_session_is_set: 'any_other_custom_column_name_in_mysql_table'
