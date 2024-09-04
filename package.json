@@ -1,7 +1,7 @@
 {
   "name": "express-flexible-mysql-session",
   "description": "A MySQL session store for express.js, forked from express-mysql-session by Charles Hill",
-  "version": "1.0.0",
+  "version": "1.0.0-beta",
   "main": "index.js",
   "scripts": {
     "test": "npm run test:unit && npm run test:integration",
