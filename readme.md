@@ -139,7 +139,9 @@ const options = {
 	checkExpirationInterval: 900000,
 	// The maximum age of a valid session; milliseconds:
 	expiration: 86400000,
-	// Whether or not to create the sessions database table, if one does not already exist:
+	// Whether or not to create the sessions database table, if one does not already exist.
+	// This cannot be `true` if the `extractDataValuesIntoCustomColumns` option is also `true`.
+	// The default value of this option depends on whether or not the `extractDataValuesIntoCustomColumns` option is `true`.
 	createDatabaseTable: true,
 	// Whether or not to end the database connection when the store is closed.
 	// The default value of this option depends on whether or not a connection was passed to the constructor.
@@ -148,6 +150,8 @@ const options = {
 	// Whether or not to disable touch:
 	disableTouch: false,
 	charset: 'utf8mb4_bin',
+	// Whether to extract data into custom columns:
+	extractDataValuesIntoCustomColumns: false,
 	schema: {
 		tableName: 'sessions',
 		columnNames: {
@@ -166,7 +170,7 @@ Additionally, the following options will be passed thru to the [mysql2 module's]
 
 It is possible to use a custom schema for your sessions database table. This can be useful if you want to have extra columns (e.g. "user_id"), indexes, foreign keys, etc. You could also change the type of the "data" column to a smaller or larger text type (e.g. "TINYTEXT", "LONGTEXT", "BLOB") or native "JSON" type.
 
-Set the `createDatabaseTable` option to `FALSE` so that the session store does not automatically create a sessions table.
+Set the `createDatabaseTable` option to `FALSE` so that the session store does not automatically create a sessions table. This option cannot be `true` if the `extractDataValuesIntoCustomColumns` option is also `true`.
 
 Use the `schema` option to provide the custom table and column names to the session store.
 ```js
@@ -180,12 +184,16 @@ const options = {
 	password: 'password',
 	database: 'session_test',
 	createDatabaseTable: false,
+	extractDataValuesIntoCustomColumns: true, // This option is required to use extra columns, or `false` if only using standard `session_id`, `expires` and `data` columns
 	schema: {
 		tableName: 'custom_sessions_table_name',
 		columnNames: {
 			session_id: 'custom_session_id_column_name',
 			expires: 'custom_expires_column_name',
-			data: 'custom_data_column_name'
+			// If `extractDataValuesIntoCustomColumns` is `true`, inclusion of the `data` column is not compulsory:
+			data: 'custom_data_column_name',
+			// If `extractDataValuesIntoCustomColumns` is `true`, you can add custom columns here:
+			custom_key_in_data_when_session_is_set: 'any_other_custom_column_name_in_mysql_table'
 		}
 	}
 };
@@ -237,7 +245,7 @@ npm ci
 
 Now, you'll need to set up a local test database:
 ```js
-{
+module.exports = {
 	host: 'localhost',
 	port: 3306,
 	user: 'session_test',

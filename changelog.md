@@ -1,5 +1,7 @@
 # Changelog
 
+* v3.1.0
+  * Added ability to specify a custom schema for extracting session data into MySQL columns.
 * v3.0.3:
   * Updated dependencies
 * v3.0.2:
